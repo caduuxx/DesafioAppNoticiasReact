@@ -1,4 +1,4 @@
-const API_KEY = "SUA_CHAVE_AQUI"; // Cadastre-se no NewsAPI ou GNews
+const API_KEY = "6571295d7f474bda9c883f5638e306e9"; // Cadastre-se no NewsAPI ou GNews
 const BASE_URL = "https://newsapi.org/v2";
 
 export interface ArticleAPI {

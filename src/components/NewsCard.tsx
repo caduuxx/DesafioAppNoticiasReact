@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useNews } from "../context/NewsContext";
 import type { ArticleAPI as Article } from "../services/newsApi";
+import { formatDate } from "../utils/formatDate";
 
 interface NewsCardProps {
   article: Article;
@@ -8,15 +9,11 @@ interface NewsCardProps {
 
 const NewsCard = ({ article }: NewsCardProps) => {
   const { favorites, addFavorite, removeFavorite } = useNews();
-
   const isFavorited = favorites.some((a) => a.url === article.url);
 
   const handleFavorite = () => {
-    if (isFavorited) {
-      removeFavorite(article);
-    } else {
-      addFavorite(article);
-    }
+    if (isFavorited) removeFavorite(article);
+    else addFavorite(article);
   };
 
   return (
@@ -32,6 +29,7 @@ const NewsCard = ({ article }: NewsCardProps) => {
       {/* Botão de Favorito */}
       <button
         onClick={handleFavorite}
+        aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${
           isFavorited ? "bg-red-500 text-white" : "bg-gray-200 text-gray-800"
         }`}
@@ -42,10 +40,10 @@ const NewsCard = ({ article }: NewsCardProps) => {
       <div className="p-4">
         <h2 className="text-lg font-semibold mb-2">{article.title}</h2>
         <p className="text-sm text-gray-500 mb-2">
-          {article.source?.name} • {new Date(article.publishedAt).toLocaleDateString("pt-BR")}
+          {article.source?.name} • {formatDate(article.publishedAt)}
         </p>
         <Link
-          to={`/details`}
+          to="/details"
           state={{ article }}
           className="text-blue-600 hover:underline font-medium"
         >

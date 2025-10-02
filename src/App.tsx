@@ -1,23 +1,18 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
-
-// Páginas
 import Home from "./pages/Home";
 import Details from "./pages/Details";
-import Favorites from "./pages/Favorites";
+import { NewsProvider } from "./context/NewsContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Header />
-      <main className="p-6">
+    <NewsProvider>
+      <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/details/:id" element={<Details />} />
-          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/details" element={<Details />} />
         </Routes>
-      </main>
-    </BrowserRouter>
+      </BrowserRouter>
+    </NewsProvider>
   );
 }
 
