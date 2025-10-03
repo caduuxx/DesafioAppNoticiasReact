@@ -1,0 +1,27 @@
+  {
+    "status": "ok",
+    "totalResults": 5,
+    "articles": [
+      {
+        "source": { "id": null, "name": "BBC News" },
+        "author": "John Doe",
+        "title": "Notícia Mock 1",
+        "description": "Descrição mock.",
+        "url": "https://example.com/1",
+        "urlToImage": "https://via.placeholder.com/300x200?text=Mock+Image",
+        "publishedAt": "2023-10-01T12:00:00Z",
+        "content": "Conteúdo mock completo."
+      },
+      {
+        "source": { "id": null, "name": "CNN" },
+        "author": null,
+        "title": "Notícia Mock 2",
+        "description": "Outra descrição.",
+        "url": "https://example.com/2",
+        "urlToImage": null,
+        "publishedAt": "2023-10-02T12:00:00Z",
+        "content": null
+      }
+    ]
+  }
+  
