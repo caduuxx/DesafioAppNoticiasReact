@@ -1,36 +1,37 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 import NewsCard from '../components/NewsCard';
-import SearchBar from '../components/SearchBar';
-import { fetchEverything } from '../services/newsApi';  // Use everything por default
+import BottomNav from '../components/BottomNav';
+import { fetchEverything } from '../services/newsApi';
 import type { ArticleAPI } from '../services/newsApi';
 
-const categories = ['technology', 'business', 'sports', 'health', 'entertainment'];
+const categories = ['Geral', 'Tech', 'Esportes', 'Negócios', 'Saúde', 'Entretenimento'];
 
 const Home = () => {
-  const [searchTerm, setSearchTerm] = useState('');  // Inicial vazio, mas fetch usa default 'brasil'
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
   const [articles, setArticles] = useState<ArticleAPI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentNav, setCurrentNav] = useState('home');
 
   const loadArticles = async (reset = false) => {
     setLoading(true);
     setError(null);
     try {
-      // Sempre use fetchEverything (com default 'brasil' se query vazia)
-      const data = await fetchEverything(searchTerm || category, category, page, 5);  // 5 para teste rápido
-      console.log('✅ Carregados:', data.length, 'artigos');
-      
-      if (reset || page === 1) {
+      const query = searchTerm || category || 'brasil';
+      const data = await fetchEverything(query, category, page, 10);
+      if (reset) {
         setArticles(data);
       } else {
         setArticles(prev => [...prev, ...data]);
       }
     } catch (err: any) {
-      console.error('❌ Erro:', err);
-      setError('Falha na API: ' + (err.message || 'Verifique a conexão'));
-      // Fallback: Use mock se public/mock/news.json existir
+      setError('Erro ao carregar feed: ' + err.message);
+      // Fallback mock se existir
       try {
         const res = await fetch('/mock/news.json');
         if (res.ok) {
@@ -43,22 +44,20 @@ const Home = () => {
     }
   };
 
-  // Carrega inicial (com default 'brasil')
   useEffect(() => {
     loadArticles(true);
   }, []);
 
-  // Recarrega na mudança
   useEffect(() => {
     const reset = page === 1;
     loadArticles(reset);
   }, [searchTerm, category, page]);
 
-  // Scroll infinito
   const handleScroll = useCallback(() => {
+    if (loading || articles.length === 0) return;
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (scrollTop + clientHeight >= scrollHeight - 300 && !loading && articles.length > 0) {
-      setPage(prev => prev + 1);
+    if (scrollTop + clientHeight >= scrollHeight - 200) {
+      setPage(p => p + 1);
     }
   }, [loading, articles.length]);
 
@@ -68,61 +67,82 @@ const Home = () => {
   }, [handleScroll]);
 
   const handleSearch = (query: string) => {
-    setSearchTerm(query.trim() || 'brasil');  // Fallback se vazio
+    setSearchTerm(query);
     setCategory('');
     setPage(1);
   };
 
   const handleCategory = (cat: string) => {
-    setCategory(cat === category ? '' : cat);
+    setCategory(cat.toLowerCase() === category.toLowerCase() ? '' : cat.toLowerCase());
     setSearchTerm('');
     setPage(1);
   };
 
-  return (
-    <div className="min-h-screen bg-white p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Notícias do Brasil</h1>
-      
-      <SearchBar onSearch={handleSearch} />
+  const handleNav = (page: string) => {
+    setCurrentNav(page);
+    if (page === 'favorites') navigate('/favorites');
+    if (page === 'search') navigate('/search');
+  };
 
-      <div className="flex gap-2 mt-4 flex-wrap justify-center mb-6">
+  return (
+    <div id="root">
+      <Header onSearch={handleSearch} />
+
+      <div className="stories">
+        <button 
+          className={`story ${!category ? 'active' : ''}`} 
+          onClick={() => handleCategory('')}
+          aria-label="Mostrar todas as categorias"
+        >
+          🏠 Todas
+        </button>
         {categories.map((cat) => (
           <button
             key={cat}
+            className={`story ${category === cat.toLowerCase() ? 'active' : ''}`}
             onClick={() => handleCategory(cat)}
-            className={`px-4 py-2 rounded-full border-2 transition-colors text-sm font-medium ${
-              category === cat
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
-            }`}
+            aria-label={`Filtrar categoria ${cat}`}
           >
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            {cat.substring(0, 4)}
           </button>
         ))}
       </div>
 
-      {error && (
-        <div className="text-center mb-4 p-4 bg-red-100 text-red-700 rounded">
-          {error} <button onClick={() => loadArticles(true)} className="underline ml-2">Tentar Novamente</button>
-        </div>
-      )}
+      <div className="feed" role="feed" aria-busy={loading}>
+        {error && (
+          <div className="error-msg" role="alert">
+            {error} <button onClick={() => loadArticles(true)}>Recarregar</button>
+          </div>
+        )}
 
-      {loading && page === 1 && <p className="text-center text-gray-600 mb-4">Carregando notícias...</p>}
+        {loading && page === 1 && (
+          <div className="loading" aria-live="polite" aria-label="Carregando notícias">
+            <div className="spinner" />
+            Carregando seu feed...
+          </div>
+        )}
 
-      <div className="grid gap-6 md:grid-cols-2">
         {articles.map((article, index) => (
-          <NewsCard key={`${article.url}-${index}`} article={article} />
+          <div key={`${article.url}-${index}`} className="post" role="article" tabIndex={0}>
+            <NewsCard article={article} />
+          </div>
         ))}
+
+        {loading && page > 1 && (
+          <div className="loading" aria-live="polite" aria-label="Carregando mais notícias">
+            <div className="spinner" />
+            Mais posts chegando...
+          </div>
+        )}
+
+        {!loading && articles.length === 0 && (
+          <div className="error-msg" role="alert">
+            Nenhum post no feed. Tente buscar!
+          </div>
+        )}
       </div>
 
-      {loading && page > 1 && <p className="text-center text-gray-600">Carregando mais...</p>}
-      {!loading && articles.length === 0 && (
-        <p className="text-center text-gray-500 mt-8">Nenhuma notícia encontrada. Busque algo!</p>
-      )}
-
-      {articles.length > 0 && (
-        <p className="text-center text-xs text-gray-400 mt-4">Mostrando {articles.length} notícias</p>
-      )}
+      <BottomNav currentPage={currentNav} onNavChange={handleNav} />
     </div>
   );
 };
