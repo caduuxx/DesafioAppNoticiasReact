@@ -1,16 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
 import NewsCard from '../components/NewsCard';
 import BottomNav from '../components/BottomNav';
+import Header from '../components/Header';
 import { fetchEverything } from '../services/newsApi';
 import type { ArticleAPI } from '../services/newsApi';
+import { useNews } from '../context/NewsContext';
+import 'boxicons/css/boxicons.min.css';
 
 const categories = ['Geral', 'Tech', 'Esportes', 'Negócios', 'Saúde', 'Entretenimento'];
 
+const categoryIcons: Record<string, string> = {
+  Geral: 'bx bx-globe',
+  Tech: 'bx bx-chip',
+  Esportes: 'bx bx-football',
+  Negócios: 'bx bx-briefcase',
+  Saúde: 'bx bx-heart',
+  Entretenimento: 'bx bx-movie',
+};
+
 const Home = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
+  const { setCurrentArticle, searchTerm, setSearchTerm } = useNews();
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
   const [articles, setArticles] = useState<ArticleAPI[]>([]);
@@ -24,14 +35,9 @@ const Home = () => {
     try {
       const query = searchTerm || category || 'brasil';
       const data = await fetchEverything(query, category, page, 10);
-      if (reset) {
-        setArticles(data);
-      } else {
-        setArticles(prev => [...prev, ...data]);
-      }
+      setArticles(reset ? data : [...articles, ...data]);
     } catch (err: any) {
       setError('Erro ao carregar feed: ' + err.message);
-      // Fallback mock se existir
       try {
         const res = await fetch('/mock/news.json');
         if (res.ok) {
@@ -44,9 +50,7 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    loadArticles(true);
-  }, []);
+  useEffect(() => { loadArticles(true); }, []);
 
   useEffect(() => {
     const reset = page === 1;
@@ -56,21 +60,13 @@ const Home = () => {
   const handleScroll = useCallback(() => {
     if (loading || articles.length === 0) return;
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    if (scrollTop + clientHeight >= scrollHeight - 200) {
-      setPage(p => p + 1);
-    }
+    if (scrollTop + clientHeight >= scrollHeight - 200) setPage(p => p + 1);
   }, [loading, articles.length]);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
-
-  const handleSearch = (query: string) => {
-    setSearchTerm(query);
-    setCategory('');
-    setPage(1);
-  };
 
   const handleCategory = (cat: string) => {
     setCategory(cat.toLowerCase() === category.toLowerCase() ? '' : cat.toLowerCase());
@@ -81,29 +77,26 @@ const Home = () => {
   const handleNav = (page: string) => {
     setCurrentNav(page);
     if (page === 'favorites') navigate('/favorites');
-    if (page === 'search') navigate('/search');
+  };
+
+  const handleReadMore = (article: ArticleAPI) => {
+    setCurrentArticle(article);
+    navigate('/details');
   };
 
   return (
-    <div id="root">
-      <Header onSearch={handleSearch} />
+    <div>
+      <Header />
 
       <div className="stories">
-        <button 
-          className={`story ${!category ? 'active' : ''}`} 
-          onClick={() => handleCategory('')}
-          aria-label="Mostrar todas as categorias"
-        >
-          🏠 Todas
-        </button>
-        {categories.map((cat) => (
+        {categories.map(cat => (
           <button
             key={cat}
             className={`story ${category === cat.toLowerCase() ? 'active' : ''}`}
             onClick={() => handleCategory(cat)}
             aria-label={`Filtrar categoria ${cat}`}
           >
-            {cat.substring(0, 4)}
+            <i className={categoryIcons[cat]}></i>
           </button>
         ))}
       </div>
@@ -124,7 +117,7 @@ const Home = () => {
 
         {articles.map((article, index) => (
           <div key={`${article.url}-${index}`} className="post" role="article" tabIndex={0}>
-            <NewsCard article={article} />
+            <NewsCard article={article} onReadMore={() => handleReadMore(article)} />
           </div>
         ))}
 

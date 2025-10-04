@@ -3,14 +3,20 @@ import Home from "./pages/Home";
 import Details from "./pages/Details";
 import Favorites from "./pages/Favorites";
 import { NewsProvider } from "./context/NewsContext";
-import Header from "./components/Header";
 
 function App() {
   return (
     <NewsProvider>
       <BrowserRouter>
-        <Header />
-        <main className="p-4 max-w-5xl mx-auto">
+        {/* Main content */}
+        <main
+          className="pt-24 mx-auto px-6"
+          style={{
+            maxWidth: "900px",
+            minHeight: "100vh",
+            paddingBottom: "80px", // espaço para bottom nav
+          }}
+        >
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/details" element={<Details />} />

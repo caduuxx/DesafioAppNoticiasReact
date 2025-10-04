@@ -1,47 +1,59 @@
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import type { ArticleAPI as Article } from '../services/newsApi';
 import { useNews } from '../context/NewsContext';
-import type { ArticleAPI } from '../services/newsApi';
 
-interface Props {
-  article: ArticleAPI;
+interface NewsCardProps {
+  article: Article;
+  onReadMore: () => void;
 }
 
-const NewsCard = ({ article }: Props) => {
+const NewsCard = ({ article, onReadMore }: NewsCardProps) => {
   const { addFavorite, removeFavorite, isFavorite } = useNews();
+
   const isFavorited = isFavorite(article.url);
 
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault(); // evita navegação ao clicar no coração
+  const handleFavorite = () => {
     if (isFavorited) removeFavorite(article);
     else addFavorite(article);
   };
 
   return (
-    <Link to="/details" state={{ article }} className="post" aria-label={`Ver detalhes da notícia: ${article.title}`}>
+    <div className="post">
       {article.urlToImage && (
-        <img src={article.urlToImage} alt={article.title} className="post-image" draggable={false} />
+        <img src={article.urlToImage} alt={article.title} className="post-image" />
       )}
+
       <div className="post-body">
         <div className="post-header">
-          <span className="post-source">{article.source?.name || 'Fonte Desconhecida'}</span>
+          <span className="post-source">{article.source?.name}</span>
           <span className="post-time">{new Date(article.publishedAt).toLocaleDateString('pt-BR')}</span>
         </div>
+
         <h2 className="post-title">{article.title}</h2>
-        {article.description && <p className="post-desc">{article.description}</p>}
+        <p className="post-desc">{article.description || 'Conteúdo não disponível.'}</p>
 
         <div className="post-actions">
           <button
+            className={`favorite-btn ${isFavorited ? 'liked' : ''}`}
             onClick={handleFavorite}
-            className={`like-btn ${isFavorited ? 'liked' : ''}`}
             aria-label={isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-            title={isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
           >
-            {isFavorited ? '♥' : '♡'}
+            {isFavorited ? (
+              <i className="bx bxs-bookmarks"></i>
+            ) : (
+              <i className="bx bx-bookmarks"></i>
+            )}
           </button>
-          <span className="read-more">Ler mais</span>
+
+          <button
+            className="read-more-btn"
+            onClick={onReadMore}
+          >
+            Ler Mais
+          </button>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 

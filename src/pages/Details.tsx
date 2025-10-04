@@ -1,74 +1,71 @@
-  import { useLocation, useNavigate } from 'react-router-dom';
-  import type { ArticleAPI as Article } from '../services/newsApi';
-  import { useNews } from '../context/NewsContext';  // Para favoritos nos detalhes
+import { useLocation, useNavigate } from 'react-router-dom';
+import type { ArticleAPI as Article } from '../services/newsApi';
+import { useNews } from '../context/NewsContext';
+import Header from '../components/Header'; // Header global no detalhe também
 
-  const Details = () => {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const state = location.state as { article: Article } | undefined;
-    const article = state?.article;
-    const { addFavorite, removeFavorite, isFavorite } = useNews();
+const Details = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { addFavorite, removeFavorite, isFavorite, currentArticle, setCurrentArticle } = useNews();
 
-    if (!article) {
-      return (
-        <div className="text-center mt-10 p-4">
-          <p className="text-gray-500 mb-4">Notícia não encontrada. Volte à lista e clique em uma notícia.</p>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-            onClick={() => navigate('/')}  // Volta para home em vez de -1 (mais seguro)
-          >
-            Voltar à Home
-          </button>
-        </div>
-      );
-    }
+  // Pega artigo do location.state OU do contexto (caso refresh)
+  const state = location.state as { article: Article } | undefined;
+  const article = state?.article || currentArticle;
 
-    const isFavorited = isFavorite(article.url);
-    const handleFavorite = () => {
-      if (isFavorited) removeFavorite(article);
-      else addFavorite(article);
-    };
+  // Se artigo veio do location, atualiza o currentArticle no contexto
+  if (state?.article && currentArticle?.url !== state.article.url) {
+    setCurrentArticle(state.article);
+  }
 
+  if (!article) {
     return (
-      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg overflow-hidden p-4">
+      <div className="text-center mt-10 p-4">
+        <p className="text-gray-500 mb-4">Notícia não encontrada.</p>
+        <button
+          className="back-btn"
+          onClick={() => navigate('/')}
+        >
+          Voltar à Home
+        </button>
+      </div>
+    );
+  }
+
+  const isFavorited = isFavorite(article.url);
+  const handleFavorite = () => {
+    if (isFavorited) removeFavorite(article);
+    else addFavorite(article);
+  };
+
+  return (
+    <div>
+      {/* Header no detalhe também */}
+      <Header />
+
+      <div className="details-page">
         {article.urlToImage && (
-          <img
-            src={article.urlToImage}
-            alt={article.title}
-            className="w-full h-64 object-cover"
-          />
+          <img src={article.urlToImage} alt={article.title} className="details-image" />
         )}
-        <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">{article.title}</h1>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="details-body">
+          <h1 className="details-title">{article.title}</h1>
+          <p className="details-meta">
             {article.source?.name} • {new Date(article.publishedAt).toLocaleDateString('pt-BR')}
           </p>
-          <p className="mb-4 text-gray-700 leading-relaxed">
+          <p className="details-content">
             {article.content || article.description || 'Conteúdo não disponível.'}
           </p>
-          <a
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline font-medium block mb-4"
-          >
-            Ler no site original
-          </a>
 
-          {/* Botão de Favorito nos Detalhes */}
-          <button
-            onClick={handleFavorite}
-            aria-label={isFavorited ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-            className={`p-2 rounded-full transition-colors mb-4 ${
-              isFavorited ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-800'
-            }`}
-          >
-            {isFavorited ? '♥ Remover Favorito' : '♡ Adicionar aos Favoritos'}
-          </button>
-
-          <div className="mt-6">
+          <div className="post-actions">
             <button
-              className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300 transition"
+              className={`favorite-btn ${isFavorited ? 'liked' : ''}`}
+              onClick={handleFavorite}
+            >
+              <i className={`bx ${isFavorited ? 'bxs-bookmarks' : 'bx-bookmarks'}`}></i>
+              {isFavorited ? ' Favorito' : ' Favoritar'}
+            </button>
+
+            <button
+              className="read-more-btn"
               onClick={() => navigate('/')}
             >
               Voltar à Home
@@ -76,8 +73,8 @@
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
-  export default Details;
-  
+export default Details;
