@@ -43,7 +43,7 @@ O app consome a **NewsAPI** para exibir manchetes em tempo real, com busca, favo
 Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/app-noticias.git
+git clone https://github.com/caduuxx/DesafioAppNoticiasReact.git
 cd app-noticias
 ```
 
