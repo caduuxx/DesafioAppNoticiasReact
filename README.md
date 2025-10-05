@@ -1,73 +1,120 @@
-# React + TypeScript + Vite
+# 📰 App de Notícias - React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicativo de notícias desenvolvido como desafio técnico.  
+O app consome a **NewsAPI** para exibir manchetes em tempo real, com busca, favoritos e detalhamento das notícias.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Tecnologias
+- **React** + **TypeScript**
+- **Vite** (build rápido e simples)
+- **React Router** (navegação entre telas)
+- **Context API** (gestão de estado global)
+- **Fetch API** (requisições HTTP)
+- **TailwindCSS** (estilização)
+- **Boxicons** (ícones)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📱 Funcionalidades
+- **Tela Inicial (Home)**
+  - Lista de notícias com imagem, título, fonte e data.
+  - Scroll infinito para carregar mais notícias.
+  - Barra de busca para filtrar por palavra-chave.
+  
+- **Tela de Detalhes**
+  - Exibe título completo, imagem em destaque e conteúdo.
+  - Botão para favoritar ou remover dos favoritos.
+  - Link para acessar a notícia original.
 
-## Expanding the ESLint configuration
+- **Favoritos**
+  - Salva notícias favoritas em estado global.
+  - Permite remover favoritos.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Outros**
+  - Header fixo com barra de busca.
+  - Mensagens de erro e fallback com dados mockados caso a API falhe.
+  - Layout responsivo, estilo mobile-first.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 📦 Instalação e Execução
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Clone o repositório:
+
+```bash
+git clone https://github.com/seu-usuario/app-noticias.git
+cd app-noticias
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Instale as dependências:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+Crie um arquivo `.env` na raiz do projeto com sua chave da **NewsAPI**:
+
+```
+VITE_NEWS_API_KEY=sua_chave_aqui
+```
+
+Inicie o servidor:
+
+```bash
+npm run dev
+```
+
+Abra no navegador em **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+## ⚙️ Estrutura de Pastas
+
+```
+src/
+ ├── components/   # Componentes reutilizáveis (Header, NewsCard, etc.)
+ ├── context/      # Context API (NewsContext.tsx)
+ ├── pages/        # Telas principais (Home, Details, Favorites)
+ ├── services/     # Comunicação com API (newsApi.ts)
+ ├── mock/         # Dados mockados para fallback
+ ├── App.tsx       # Estrutura de rotas
+ └── main.tsx      # Ponto de entrada
+```
+
+---
+
+## 🛠️ Decisões Técnicas
+
+* **Context API**: escolhido para simplificar a gestão de estado (busca, favoritos e artigo atual) sem necessidade de Redux.
+* **React Router**: usado para navegação entre Home, Detalhes e Favoritos.
+* **Fallback com mock**: implementado para evitar falha em caso de limite da API gratuita.
+* **TypeScript**: adicionado para aumentar a confiabilidade e clareza no desenvolvimento.
+* **Vite**: rápido, simples e ideal para projetos React modernos.
+
+---
+
+
+## 🧪 Testes Locais
+
+* Buscar notícias por palavra-chave.
+* Favoritar e desfavoritar.
+* Acessar detalhes via “Ler mais”.
+* Recarregar página em “Detalhes” (deve mostrar fallback).
+* Conferir favoritos persistindo enquanto o app estiver aberto.
+
+---
+
+## 📌 Observações
+
+* A **NewsAPI** no plano gratuito possui limite de requisições diárias.  
+  Caso o limite seja atingido, o app utiliza um **arquivo mock (mock/news.json)** para continuar funcionando.  
+* Esse projeto foi desenvolvido no contexto de um desafio técnico.
+
+---
+
+## 👨‍💻 Autor
+
+Carlos Eduardo Brandão Rodrigues  
+[LinkedIn](https://www.linkedin.com/in/carloseduardobrandãodev/)
+
